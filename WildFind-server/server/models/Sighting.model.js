@@ -1,15 +1,21 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
-const sightingSchema = new Schema(
+const SightingSchema = new Schema(
   {
-    title: String,
-    description: String,
-    imageUrl: String,
+    specimenId: {
+      type: Schema.Types.ObjectId,
+      ref: "Specimen",
+      required: true,
+    },
+    image: String,
+    description: { type: String, required: true },
+    location: { type: String, required: true },
+    date: { type: Date, default: Date.now },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = model("Sighting", sightingSchema);
+module.exports = model("Sighting", SightingSchema);
