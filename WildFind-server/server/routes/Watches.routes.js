@@ -4,10 +4,11 @@ const mongoose = require("mongoose");
 
 const Watch = require("../models/Watch.model");
 const Specimen = require("../models/Specimen.model");
+const Sightings = require("../models/Sighting.model");
 
 router.get("/watchlist", (req, res, next) => {
   Watch.find()
-    // .populate("specimens")
+    .populate("sightings")
     .then((watches) => {
       res.status(200).json(watches);
     })
@@ -56,6 +57,7 @@ router.get("/watchlist/:watchId", (req, res, next) => {
   }
 
   Watch.findById(watchId)
+    .populate("sightings")
     .then((watch) => {
       res.status(200).json(watch);
     })
