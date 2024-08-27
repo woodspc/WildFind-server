@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 
 const Specimen = require("../models/Specimen.model");
+const Sighting = require("../models/Sighting.model");
 
 const fileUploader = require("../config/cloudinary.config");
 
@@ -17,6 +18,7 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   res.json({ image: req.file.path });
 });
 
+//GET all of the specimens in the database
 router.get("/specimens", (req, res, next) => {
   Specimen.find()
     .populate("sightings")
@@ -28,6 +30,7 @@ router.get("/specimens", (req, res, next) => {
     });
 });
 
+//GET a specific specimen by the id
 router.get("/specimens/:specimenId", (req, res, next) => {
   const { specimenId } = req.params;
 
@@ -46,6 +49,18 @@ router.get("/specimens/:specimenId", (req, res, next) => {
     });
 });
 
+router.get("/specimens/:specimenId/sightings", (req, res, next) => {
+  const { specimenId } = req.params;
+
+  Specimen.findById(specimenId)
+    .populate("sightings")
+    .then((specimen) => {
+      res.status(200).json(specimen.sightings);
+    })
+    .catch((err) => next(err));
+});
+
+//POST a new specimen to the database
 router.post("/specimens", (req, res, next) => {
   const { typeId, name, dangerLevel, edible, image, description, location } =
     req.body;
@@ -76,6 +91,8 @@ router.post("/specimens", (req, res, next) => {
       next(err);
     });
 });
+
+module.exports = router;
 
 /* router.get("/plants", (req, res, next) => {
   Specimen.find()
@@ -134,5 +151,3 @@ router.post("/specimens", (req, res, next) => {
       next(err);
     });
 }); */
-
-module.exports = router;
