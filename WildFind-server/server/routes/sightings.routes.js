@@ -35,6 +35,19 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   res.json({ image: req.file.path });
 });
 
+//GET specific sighting by sighting id
+router.get("/sightings/:sightingId", (req, res, next) => {
+  const { sightingId } = req.params;
+
+  Sighting.findById(sightingId)
+    .then((sight) => {
+      res.status(200).json(sight);
+    })
+    .catch((err) => {
+      res.status(400).json(err);
+    });
+});
+
 // POST new sighting
 router.post("/sightings", (req, res, next) => {
   const { specimenId, image, description, location, date } = req.body;

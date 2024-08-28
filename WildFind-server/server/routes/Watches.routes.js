@@ -4,10 +4,11 @@ const mongoose = require("mongoose");
 
 const Watch = require("../models/Watch.model");
 const Specimen = require("../models/Specimen.model");
+const Sightings = require("../models/Sighting.model");
 
 router.get("/watchlist", (req, res, next) => {
   Watch.find()
-    // .populate("specimens")
+    .populate("sightings")
     .then((watches) => {
       res.status(200).json(watches);
     })
@@ -47,6 +48,7 @@ router.post("/watchlist", (req, res, next) => {
     .catch((err) => next(err));
 });
 
+//GET specific watch item
 router.get("/watchlist/:watchId", (req, res, next) => {
   const { watchId } = req.params;
 
@@ -56,12 +58,47 @@ router.get("/watchlist/:watchId", (req, res, next) => {
   }
 
   Watch.findById(watchId)
+    .populate("sightings")
     .then((watch) => {
       res.status(200).json(watch);
     })
     .catch((err) => {
       next(err);
     });
+});
+
+//PUT specific watchlist item
+router.put("/watchlist/:watchId", (req, res, next) => {
+  const { watchId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(watchId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
+
+  Watch.findByIdAndUpdate(watchId)
+    .then((updatedWatch) => {
+      res.json(updatedWatch);
+    })
+    .catch((err) => res.json(err));
+});
+
+//DELETE specific watchlist item
+router.delete("/watchlist/:watchId", (req, res, next) => {
+  const { watchId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(watchId)) {
+    res.status(400).json({ message: "Specified id is not valid" });
+    return;
+  }
+
+  Watch.findByIdAndDelete(watchId)
+    .then((watch) => {
+      res.json({
+        message: `Watchlist item with id: ${watchId} was removed successfully.`,
+      });
+    })
+    .catch((error) => res.json(error));
 });
 
 module.exports = router;
