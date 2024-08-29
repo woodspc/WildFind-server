@@ -35,6 +35,19 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   res.json({ image: req.file.path });
 });
 
+//GET specific sightings by the location
+//Made this route to be able to access all of the sightings in a specific location, for the map
+router.get("/sightings/:location", (req, res, next) => {
+  const { location } = req.params;
+  Sighting.find({ location })
+    .then((sight) => {
+      res.status(200).json(sight);
+    })
+    .catch((err) => {
+      res.status(400).json(err);
+    });
+});
+
 //GET specific sighting by sighting id
 router.get("/sightings/:sightingId", (req, res, next) => {
   const { sightingId } = req.params;
