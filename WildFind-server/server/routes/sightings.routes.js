@@ -40,6 +40,7 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
 router.get("/sightings/:location", (req, res, next) => {
   const { location } = req.params;
   Sighting.find({ location })
+    .populate("specimenId")
     .then((sight) => {
       res.status(200).json(sight);
     })
