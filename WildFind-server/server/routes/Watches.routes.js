@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const Watch = require("../models/Watch.model");
 const Specimen = require("../models/Specimen.model");
 const Sightings = require("../models/Sighting.model");
+const User = require("../models/User.model");
 
 router.get("/watchlist", (req, res, next) => {
   Watch.find()
@@ -17,8 +18,9 @@ router.get("/watchlist", (req, res, next) => {
     });
 });
 
-router.post("/watchlist", (req, res, next) => {
-  const { specimenId } = req.body;
+//POST specific user's watchList array by using the userId in the request body
+router.post("/watchlist/:userId", (req, res, next) => {
+  const { specimenId, userId } = req.body;
 
   // Validate the provided specimenId
   if (!mongoose.Types.ObjectId.isValid(specimenId)) {
@@ -44,7 +46,17 @@ router.post("/watchlist", (req, res, next) => {
         sightings: specimen.sightings, // assuming sightings is an array of ObjectId references
       });
     })
-    .then((watch) => res.status(201).json(watch))
+    .then((createdWatch) => {
+      //Create a new watch and push it to the correct user's watchList array. Doing the same as in sightings.
+      return User.findByIdAndUpdate(
+        userId,
+        {
+          $push: { watchList: createdWatch._id },
+        },
+        { new: true }
+      );
+    })
+    .then((updatedUser) => res.status(201).json(updatedUser))
     .catch((err) => next(err));
 });
 

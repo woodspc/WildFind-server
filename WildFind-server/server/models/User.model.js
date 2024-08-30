@@ -18,6 +18,7 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Name is required."],
     },
+    watchList: [{ type: Schema.Types.ObjectId, ref: "Watch" }],
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`
