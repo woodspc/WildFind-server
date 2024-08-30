@@ -29,10 +29,9 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   console.log("file is: ", req.file);
 
   if (!req.file) {
-    next(new Error("No file uploaded!"));
-    return;
+    return res.status(400).json({ message: "no file uploaded" });
   }
-  res.json({ image: req.file.path });
+  res.json({ fileUrl: req.file.path });
 });
 
 //GET specific sightings by the location

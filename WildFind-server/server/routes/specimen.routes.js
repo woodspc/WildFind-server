@@ -12,15 +12,25 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   console.log("file is: ", req.file);
 
   if (!req.file) {
-    next(new Error("No file uploaded!"));
-    return;
+    return res.status(400).json({ message: "no file uploaded" });
   }
-  res.json({ image: req.file.path });
+  res.json({ fileUrl: req.file.path });
 });
 
 //GET all of the specimens in the database
 router.get("/specimens", (req, res, next) => {
   Specimen.find()
+    .populate("sightings")
+    .then((specimens) => {
+      res.status(200).json(specimens);
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
+
+router.get("/specimens", (req, res, next) => {
+  Specimen.find({ typeId: { $lte: 8 } })
     .populate("sightings")
     .then((specimens) => {
       res.status(200).json(specimens);
