@@ -12,6 +12,10 @@ const SightingSchema = new Schema(
     description: { type: String, required: true },
     location: { type: String, required: true },
     date: { type: Date, default: Date.now },
+    username: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
