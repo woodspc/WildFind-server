@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const verifyUser = require("../middleware/verifyUser.middleware");
 
 // ℹ️ Handles password encryption
 const bcrypt = require("bcrypt");
@@ -126,6 +127,18 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
 
   // Send back the token payload object containing the user data
   res.status(200).json(req.payload);
+});
+
+router.get("/user/:userId", isAuthenticated, verifyUser, (req, res, next) => {
+  // If the middleware passes, you know the user ID from the token matches the requested ID
+  User.findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json(user);
+    })
+    .catch((err) => next(err));
 });
 
 module.exports = router;
