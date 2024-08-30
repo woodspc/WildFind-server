@@ -63,7 +63,7 @@ router.get("/sightings/:sightingId", (req, res, next) => {
 
 // POST new sighting
 router.post("/sightings", (req, res, next) => {
-  const { specimenId, image, description, location, date } = req.body;
+  const { username, specimenId, image, description, location, date } = req.body;
 
   // Validate specimenId
   if (!mongoose.isValidObjectId(specimenId)) {
@@ -71,7 +71,7 @@ router.post("/sightings", (req, res, next) => {
   }
 
   // Create the new sighting
-  Sighting.create({ specimenId, image, description, location, date })
+  Sighting.create({ username, specimenId, image, description, location, date })
     .then((createdSighting) => {
       return Specimen.findByIdAndUpdate(specimenId, {
         $push: { sightings: createdSighting._id },
