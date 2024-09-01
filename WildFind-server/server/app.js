@@ -30,7 +30,7 @@ app.use("/api", actionsRouter);
 const specimenRouter = require("./routes/specimen.routes");
 app.use("/api", specimenRouter);
 
-const watchesRouter = require("./routes/Watches.routes");
+const watchesRouter = require("./routes/watchlist.routes");
 app.use("/api", watchesRouter);
 
 const userRouter = require("./routes/user.routes");
