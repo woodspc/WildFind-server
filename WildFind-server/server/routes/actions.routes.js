@@ -10,6 +10,10 @@ const Actions = require("../models/Actions.model");
 router.get("/actions", (req, res, next) => {
   Actions.find()
     .populate("user")
+    .populate({
+      path: "comments",
+      populate: { path: "userId" },
+    })
     //Nesting .populate to also receive the specimen information inside sightings
     .populate({
       path: "sighting",
