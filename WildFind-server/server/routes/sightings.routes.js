@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 const Sighting = require("../models/Sighting.model");
 const Specimen = require("../models/Specimen.model");
+const Actions = require("../models/Actions.model");
 
 // ********* require fileUploader in order to use it *********
 const fileUploader = require("../config/cloudinary.config");
@@ -54,6 +55,7 @@ router.get("/sightings/:sightingId", (req, res, next) => {
   const { sightingId } = req.params;
 
   Sighting.findById(sightingId)
+    .populate("userId")
     .then((sight) => {
       res.status(200).json(sight);
     })
@@ -64,7 +66,8 @@ router.get("/sightings/:sightingId", (req, res, next) => {
 
 // POST new sighting
 router.post("/sightings", (req, res, next) => {
-  const { username, specimenId, image, description, location, date } = req.body;
+  const { username, userId, specimenId, image, description, location, date } =
+    req.body;
 
   // Validate specimenId
   if (!mongoose.isValidObjectId(specimenId)) {
@@ -73,18 +76,29 @@ router.post("/sightings", (req, res, next) => {
 
   // Create the new sighting
   Sighting.create({
-    username: username,
+    username,
+    userId,
     specimenId,
     image,
     description,
     location,
     date,
   })
+    //Add the sighting to specific animal
     .then((createdSighting) => {
       return Specimen.findByIdAndUpdate(specimenId, {
         $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    //Add the created sighting to Actions collection
+    .then((createdSighting) => {
+      console.log(createdSighting.userId);
+      return Actions.create({
+        sighting: createdSighting._id,
+        user: createdSighting.userId,
       });
     })
+
     .then((response) => res.json(response))
     .catch((err) => res.json(err));
 });
