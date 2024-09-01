@@ -21,16 +21,16 @@ app.use("/api", indexRoutes);
 const authRoutes = require("./routes/auth.routes");
 app.use("/auth", authRoutes);
 
-const sightingsRouter = require("./routes/Sightings.routes"); // <== has to be added
-app.use("/api", sightingsRouter); // <== has to be added
+const sightingsRouter = require("./routes/sightings.routes");
+app.use("/api", sightingsRouter);
 
-/* const plsightingsRouter = require("./routes/Pl-Sightings.routes");
-app.use("/api", plsightingsRouter); */
+const actionsRouter = require("./routes/actions.routes");
+app.use("/api", actionsRouter);
 
 const specimenRouter = require("./routes/specimen.routes");
 app.use("/api", specimenRouter);
 
-const watchesRouter = require("./routes/Watches.routes");
+const watchesRouter = require("./routes/watchlist.routes");
 app.use("/api", watchesRouter);
 
 const userRouter = require("./routes/user.routes");
