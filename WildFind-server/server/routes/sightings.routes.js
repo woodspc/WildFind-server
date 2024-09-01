@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const Sighting = require("../models/Sighting.model");
 const Specimen = require("../models/Specimen.model");
 const Actions = require("../models/Actions.model");
+const User = require("../models/User.model");
 
 // ********* require fileUploader in order to use it *********
 const fileUploader = require("../config/cloudinary.config");
@@ -90,9 +91,13 @@ router.post("/sightings", (req, res, next) => {
         $push: { sightings: createdSighting._id },
       }).then(() => createdSighting);
     })
+    .then((createdSighting) => {
+      return User.findByIdAndUpdate(userId, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
     //Add the created sighting to Actions collection
     .then((createdSighting) => {
-      console.log(createdSighting.userId);
       return Actions.create({
         sighting: createdSighting._id,
         user: createdSighting.userId,

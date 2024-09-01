@@ -9,6 +9,12 @@ const Actions = require("../models/Actions.model");
 //GET all actions
 router.get("/actions", (req, res, next) => {
   Actions.find()
+    .populate("user")
+    //Nesting .populate to also receive the specimen information inside sightings
+    .populate({
+      path: "sighting",
+      populate: { path: "specimenId", model: Specimen },
+    })
     .then((response) => {
       res.status(200).json(response);
     })
@@ -20,6 +26,8 @@ router.get("/actions/:actionId", (req, res, next) => {
   const { actionId } = req.params;
 
   Actions.findById(actionId)
+    .populate("user")
+    .populate("sighting")
     .then((response) => {
       res.status(200).json(response);
     })
