@@ -13,7 +13,7 @@ router.get("/actions", (req, res, next) => {
     //Nesting .populate to also receive the specimen information inside sightings
     .populate({
       path: "sighting",
-      populate: { path: "specimenId", model: Specimen },
+      populate: { path: "specimenId" },
     })
     .then((response) => {
       res.status(200).json(response);
