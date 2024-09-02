@@ -19,6 +19,10 @@ router.get("/actions", (req, res, next) => {
       path: "sighting",
       populate: { path: "specimenId" },
     })
+    .populate({
+      path: "additions",
+      populate: { path: "specimenId" },
+    })
     .then((response) => {
       res.status(200).json(response);
     })
@@ -32,6 +36,7 @@ router.get("/actions/:actionId", (req, res, next) => {
   Actions.findById(actionId)
     .populate("user")
     .populate("sighting")
+    .populate("additions")
     .then((response) => {
       res.status(200).json(response);
     })

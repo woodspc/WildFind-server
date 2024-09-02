@@ -20,6 +20,7 @@ router.get("/users/:userId", (req, res, next) => {
   User.findById(userId)
     .populate("sightings")
     .populate("watchList")
+    .populate("additions")
 
     .then((user) => {
       res.status(200).json(user);
