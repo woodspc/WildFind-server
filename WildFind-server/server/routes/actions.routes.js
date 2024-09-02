@@ -20,8 +20,8 @@ router.get("/actions", (req, res, next) => {
       populate: { path: "specimenId" },
     })
     .populate({
-      path: "additions",
-      populate: { path: "specimenId" },
+      path: "addition",
+      populate: { path: "userId" },
     })
     .then((response) => {
       res.status(200).json(response);
