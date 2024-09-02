@@ -22,8 +22,10 @@ router.get("/users/:userId", (req, res, next) => {
   User.findById(userId)
     .populate("sightings")
     .populate("watchList")
+    .populate("additions")
     .populate("following")
     .populate("followers")
+
 
     .then((user) => {
       res.status(200).json(user);

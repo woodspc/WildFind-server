@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 
 const Specimen = require("../models/Specimen.model");
 const Sighting = require("../models/Sighting.model");
+const Actions = require("../models/Actions.model");
+const User = require("../models/User.model");
 
 const fileUploader = require("../config/cloudinary.config");
 
@@ -51,6 +53,7 @@ router.get("/specimens/:specimenId", (req, res, next) => {
 
   Specimen.findById(specimenId)
     .populate("sightings")
+    .populate("userId")
     .then((specimen) => {
       res.status(200).json(specimen);
     })
@@ -72,8 +75,17 @@ router.get("/specimens/:specimenId/sightings", (req, res, next) => {
 
 //POST a new specimen to the database
 router.post("/specimens", (req, res, next) => {
-  const { typeId, name, dangerLevel, edible, image, description, location } =
-    req.body;
+  const {
+    username,
+    userId,
+    typeId,
+    name,
+    dangerLevel,
+    edible,
+    image,
+    description,
+    location,
+  } = req.body;
 
   if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].includes(typeId)) {
     return res.status(400).json({ message: "Invalid typeId" });
@@ -84,6 +96,8 @@ router.post("/specimens", (req, res, next) => {
   }
 
   const newSpecimen = {
+    username,
+    userId,
     typeId,
     name,
     dangerLevel,
@@ -95,10 +109,70 @@ router.post("/specimens", (req, res, next) => {
 
   Specimen.create(newSpecimen)
     .then((specimen) => {
-      res.status(201).json(specimen);
+      return User.findByIdAndUpdate(userId, {
+        $push: { additions: specimen._id },
+      }).then(() => specimen); // Pass the specimen down the chain
+    })
+    .then((specimen) => {
+      return Actions.create({
+        addition: specimen._id,
+        user: specimen.userId,
+      });
+    })
+    .then((response) => {
+      res.status(201).json(response);
     })
     .catch((err) => {
       next(err);
+    });
+});
+
+router.put("/specimens/:specimenId", (req, res, next) => {
+  const { specimenId } = req.params;
+  const updatedData = req.body; // Contains the fields that need to be updated
+
+  if (!mongoose.Types.ObjectId.isValid(specimenId)) {
+    return res.status(400).json({ message: "Specified id is not valid" });
+  }
+
+  Specimen.findByIdAndUpdate(specimenId, updatedData, { new: true })
+    .then((updatedSpecimen) => {
+      if (!updatedSpecimen) {
+        return res.status(404).json({ message: "Specimen not found" });
+      }
+      res.json(updatedSpecimen);
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
+
+// DELETE  specimen
+router.delete("/specimens/:specimenId", (req, res, next) => {
+  const { specimenId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(specimenId)) {
+    return res.status(400).json({ message: "Specified id is not valid" });
+  }
+
+  Specimen.findByIdAndDelete(specimenId)
+    .then((deletedSpecimen) => {
+      if (!deletedSpecimen) {
+        return res.status(404).json({ message: "Specimen not found" });
+      }
+
+      // Optionally remove related sightings or actions
+      return Sighting.deleteMany({ specimen: specimenId })
+        .then(() => Actions.deleteMany({ addition: specimenId }))
+        .then(() => {
+          res.json({
+            message: `Specimen with ID ${specimenId} and related data were removed successfully.`,
+          });
+        });
+    })
+    .catch((error) => {
+      console.error("Error during specimen deletion:", error);
+      res.status(500).json({ message: "An error occurred during deletion." });
     });
 });
 
