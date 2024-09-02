@@ -18,7 +18,9 @@ const userSchema = new Schema(
       required: [true, "Username is required."],
     },
     watchList: [{ type: Schema.Types.ObjectId, ref: "Watch" }],
-    sightings: [{ type: Schema.Types.ObjectId, ref: "Sightings" }],
+    sightings: [{ type: Schema.Types.ObjectId, ref: "Sighting" }],
+    following: [{ type: String }],
+    followers: [{ type: String }],
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

@@ -18,7 +18,9 @@ router.get("/users/:userId", (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
+    .populate("sightings")
     .populate("watchList")
+
     .then((user) => {
       res.status(200).json(user);
     })
@@ -26,5 +28,7 @@ router.get("/users/:userId", (req, res, next) => {
       next(err);
     });
 });
+
+router.post("/users");
 
 module.exports = router;
