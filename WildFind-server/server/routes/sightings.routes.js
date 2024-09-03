@@ -103,12 +103,38 @@ router.post("/sightings", (req, res, next) => {
         user: createdSighting.userId,
       });
     })
-
     .then((response) => res.json(response))
     .catch((err) => res.json(err));
 });
 
+//Log items into actions
+const loggerFunction = ({
+  userId,
+  sightingId,
+  specimenId,
+  watchListId,
+  commentId,
+}) => {
+  return Actions.create({
+    user: userId,
+    sighting: sightingId,
+    addition: specimenId,
+    watchList: watchListId,
+    comments: commentId,
+  });
+};
+
 module.exports = router;
+
+/* return loggerFunction({
+  userId: createdSighting._id,
+  sighting: createdSighting._id,
+}); */
+/* 
+return Actions.create({
+  sighting: createdSighting._id,
+  user: createdSighting.userId,
+}); */
 
 // router.post("/tasks", (req, res, next) => {
 //     const { title, description, projectId } = req.body;
