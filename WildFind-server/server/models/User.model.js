@@ -24,6 +24,7 @@ const userSchema = new Schema(
     followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
     sentMessages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
     receivedMessages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
+    conversations: [{ type: Schema.Types.ObjectId, ref: "Conversation" }],
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

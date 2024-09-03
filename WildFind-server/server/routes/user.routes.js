@@ -26,6 +26,10 @@ router.get("/users/:userId", (req, res, next) => {
     .populate("following")
     .populate("followers")
     .populate({
+      path: "conversations",
+      populate: { path: "messages" },
+    })
+    .populate({
       path: "receivedMessages",
       populate: { path: "sender", select: "username" },
     })
