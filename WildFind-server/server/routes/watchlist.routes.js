@@ -37,6 +37,7 @@ router.post("/watchlist/:userId", (req, res, next) => {
       // Create a new Watch document with data from the Specimen document using .create()
       return Watch.create({
         specimenId,
+        userId: specimen.userId,
         name: specimen.name,
         typeId: specimen.typeId,
         dangerLevel: specimen.dangerLevel,

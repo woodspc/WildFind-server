@@ -16,7 +16,12 @@ const watchSchema = new Schema(
     description: { type: String, required: true },
     location: { type: String, required: true },
     sightings: [{ type: Schema.Types.ObjectId, ref: "Sighting" }],
+    userId: {
+      type: String,
+      required: true,
+    },
   },
+
   {
     timestamps: true,
   }
