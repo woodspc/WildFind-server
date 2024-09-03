@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const verifyUser = require("../middleware/verifyUser.middleware");
-// const PasswordReset = require("../models/PasswordReset");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
@@ -156,35 +155,17 @@ router.get("/user/:userId", isAuthenticated, verifyUser, (req, res, next) => {
     .catch((err) => next(err));
 });
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
 // POST /auth/request-password-reset - Send a reset password link to the user's email
 router.post("/request-password-reset", async (req, res, next) => {
-  // const { email } = req.body;
+  const { email } = req.body;
 
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email });
     if (!user) {
       return res
         .status(400)
         .json({ message: "User with this email does not exist." });
     }
-
-    user.isPasswordReset = true; // Set flag to skip validation
-    await user.save({ validateBeforeSave: false }); // Skip validation
 
     // Generate a reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
