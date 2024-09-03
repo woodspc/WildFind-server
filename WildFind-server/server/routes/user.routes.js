@@ -26,13 +26,27 @@ router.get("/users/:userId", (req, res, next) => {
     .populate("following")
     .populate("followers")
     .populate({
+      path: "conversations",
+      populate: [
+        { path: "user1Id", select: "username" },
+        { path: "user2Id", select: "username" },
+        {
+          path: "messages",
+          populate: {
+            path: "sender",
+            select: "username",
+          },
+        },
+      ],
+    })
+    /*  .populate({
       path: "receivedMessages",
       populate: { path: "sender", select: "username" },
     })
     .populate({
       path: "sentMessages",
       populate: { path: "receiver", select: "username" },
-    })
+    }) */
     .then((user) => {
       res.status(200).json(user);
     })
