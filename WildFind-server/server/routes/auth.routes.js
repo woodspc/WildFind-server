@@ -1,6 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const verifyUser = require("../middleware/verifyUser.middleware");
+// const PasswordReset = require("../models/PasswordReset");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+
+const fileUploader = require("../config/cloudinary.config");
+
+// POST image
+router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
+  console.log("file is: ", req.file);
+
+  if (!req.file) {
+    return res.status(400).json({ message: "no file uploaded" });
+  }
+  res.json({ fileUrl: req.file.path });
+});
 
 // ℹ️ Handles password encryption
 const bcrypt = require("bcrypt");
@@ -19,7 +34,7 @@ const saltRounds = 10;
 
 // POST /auth/signup  - Creates a new user in the database
 router.post("/signup", (req, res, next) => {
-  const { email, password, username } = req.body;
+  const { email, password, username, image } = req.body;
 
   // Check if email or password or name are provided as empty strings
   if (email === "" || password === "" || username === "") {
@@ -59,15 +74,15 @@ router.post("/signup", (req, res, next) => {
 
       // Create the new user in the database
       // We return a pending promise, which allows us to chain another `then`
-      return User.create({ email, password: hashedPassword, username });
+      return User.create({ email, password: hashedPassword, username, image });
     })
     .then((createdUser) => {
       // Deconstruct the newly created user object to omit the password
       // We should never expose passwords publicly
-      const { email, username, _id } = createdUser;
+      const { email, username, _id, image } = createdUser;
 
       // Create a new object that doesn't expose the password
-      const user = { email, username, _id };
+      const user = { email, username, _id, image };
 
       // Send a json response containing the user object
       res.status(201).json({ user: user });
@@ -99,10 +114,10 @@ router.post("/login", (req, res, next) => {
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
-        const { _id, email, username } = foundUser;
+        const { _id, email, username, image } = foundUser;
 
         // Create an object that will be set as the token payload
-        const payload = { _id, email, username };
+        const payload = { _id, email, username, image };
 
         // Create a JSON Web Token and sign it
         const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
@@ -139,6 +154,108 @@ router.get("/user/:userId", isAuthenticated, verifyUser, (req, res, next) => {
       res.status(200).json(user);
     })
     .catch((err) => next(err));
+});
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+// POST /auth/request-password-reset - Send a reset password link to the user's email
+router.post("/request-password-reset", async (req, res, next) => {
+  // const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "User with this email does not exist." });
+    }
+
+    user.isPasswordReset = true; // Set flag to skip validation
+    await user.save({ validateBeforeSave: false }); // Skip validation
+
+    // Generate a reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    // Set token and expiration on the user object
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour from now
+    await user.save();
+
+    // Send email with reset link
+    const resetUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/reset-password/${resetToken}`;
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: "no-reply@example.com",
+      to: user.email,
+      subject: "Password Reset Request",
+      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
+      Please click on the following link, or paste this into your browser to complete the process:\n\n
+      ${resetUrl}\n\n
+      If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: "Password reset email sent." });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /auth/reset-password/:token - Reset the user's password
+router.post("/reset-password/:token", async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }, // Ensure the token is still valid
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Token is invalid or has expired." });
+    }
+
+    // Update password and clear reset token and expiry
+    const salt = bcrypt.genSaltSync(10);
+    user.password = bcrypt.hashSync(password, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Password has been reset." });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

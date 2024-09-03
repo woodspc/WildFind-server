@@ -41,6 +41,47 @@ router.get("/users/:userId", (req, res, next) => {
     });
 });
 
+//PUT --> edit user
+router.put("/users/:userId", (req, res, next) => {
+  const { userId } = req.params;
+  const updatedData = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Specified id is not valid" });
+  }
+
+  User.findByIdAndUpdate(userId, updatedData, { new: true })
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json(updatedUser);
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
+
+// DELETE  user
+router.delete("/users/:userId", (req, res, next) => {
+  const { userId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "Specified id is not valid" });
+  }
+
+  User.findByIdAndDelete(userId)
+    .then((deletedUser) => {
+      if (!deletedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+    })
+    .catch((error) => {
+      console.error("Error during user deletion:", error);
+      res.status(500).json({ message: "An error occurred during deletion." });
+    });
+});
+
 //Post a new follower after clicking follow user button
 router.post("/users/:followedUserId/following", (req, res, next) => {
   const { userId } = req.body; //currently logged in userId
