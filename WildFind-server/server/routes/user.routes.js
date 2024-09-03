@@ -25,9 +25,14 @@ router.get("/users/:userId", (req, res, next) => {
     .populate("additions")
     .populate("following")
     .populate("followers")
-    .populate("receivedMessages")
-    .populate("sentMessages")
-
+    .populate({
+      path: "receivedMessages",
+      populate: { path: "sender", select: "username" },
+    })
+    .populate({
+      path: "sentMessages",
+      populate: { path: "receiver", select: "username" },
+    })
     .then((user) => {
       res.status(200).json(user);
     })
