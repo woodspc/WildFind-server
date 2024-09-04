@@ -28,7 +28,8 @@ module.exports = (app) => {
         FRONTEND_URL,
         "http://localhost:5005",
         "http://localhost:5173",
-        "https://wildfind.netlify.app/",
+        "https://wildfind.netlify.app",
+        "https://66d83d619839909402470bd9--wildfind.netlify.app",
       ],
     })
   );
