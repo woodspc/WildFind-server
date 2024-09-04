@@ -16,7 +16,11 @@ const userSchema = new Schema(
     username: {
       type: String,
       required: [true, "Username is required."],
+      unique: true,
     },
+    image: String,
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
     watchList: [{ type: Schema.Types.ObjectId, ref: "Watch" }],
     sightings: [{ type: Schema.Types.ObjectId, ref: "Sighting" }],
     additions: [{ type: Schema.Types.ObjectId, ref: "Specimen" }],
