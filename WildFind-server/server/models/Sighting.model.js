@@ -10,7 +10,8 @@ const SightingSchema = new Schema(
     },
     image: String,
     description: { type: String, required: true },
-    location: { type: [String], required: true },
+    // location: { type: [String], required: true },
+    location: { type: String, required: true },
     date: { type: Date, default: Date.now },
     username: {
       type: String,
