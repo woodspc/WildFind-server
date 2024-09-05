@@ -90,6 +90,7 @@ router.post("/signup", (req, res, next) => {
       const { email, username, _id, image, notifications, bio, banner } =
         createdUser;
 
+
       // Create a new object that doesn't expose the password
       const user = { email, username, _id, image, notifications, bio, banner };
 
