@@ -19,6 +19,8 @@ const userSchema = new Schema(
       unique: true,
     },
     image: String,
+    bio: String,
+    banner: String,
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     watchList: [{ type: Schema.Types.ObjectId, ref: "Watch" }],
