@@ -62,11 +62,34 @@ router.post("/messages/:receiver", (req, res, next) => {
         }),
         User.findByIdAndUpdate(receiver, {
           $push: { receivedMessages: newMessage._id },
+          $push: { notifications: newMessage._id },
         }),
       ]).then(() => newMessage);
     })
     .then((newMessage) => res.status(200).json(newMessage))
     .catch((err) => next(err));
+});
+
+router.put("/users/:userId/notifications", (req, res, next) => {
+  const { userId } = req.params;
+
+  User.findByIdAndUpdate(
+    userId,
+    {
+      // Clear the notifications array
+      $set: { notifications: [] },
+    },
+    { new: true }
+  )
+    .then((updatedUser) => {
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.status(200).json({ message: "Notifications cleared successfully" });
+    })
+    .catch((err) => {
+      next(err);
+    });
 });
 
 /* 
