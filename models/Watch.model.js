@@ -14,6 +14,7 @@ const watchSchema = new Schema(
     edible: String,
     image: String,
     description: { type: String, required: true },
+    // location: { type: String, required: true },
     location: { type: [String], required: true },
     sightings: [{ type: Schema.Types.ObjectId, ref: "Sighting" }],
     userId: {
