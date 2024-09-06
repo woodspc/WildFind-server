@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-
 const Watch = require("../models/Watch.model");
 const Specimen = require("../models/Specimen.model");
 const Sightings = require("../models/Sighting.model");
@@ -20,7 +19,9 @@ router.get("/watchlist", (req, res, next) => {
 
 //POST specific user's watchList array by using the userId in the request body
 router.post("/watchlist/:userId", (req, res, next) => {
-  const { specimenId, userId } = req.body;
+  const { specimenId, userId, note } = req.body;
+
+  console.log("Note received:", note);
 
   // Validate the provided specimenId
   if (!mongoose.Types.ObjectId.isValid(specimenId)) {
@@ -37,14 +38,15 @@ router.post("/watchlist/:userId", (req, res, next) => {
       // Create a new Watch document with data from the Specimen document using .create()
       return Watch.create({
         specimenId,
-        userId,
         name: specimen.name,
         typeId: specimen.typeId,
         dangerLevel: specimen.dangerLevel,
         image: specimen.image,
+        note: note,
         description: specimen.description,
         location: specimen.location,
         sightings: specimen.sightings, // assuming sightings is an array of ObjectId references
+        userId,
       });
     })
     .then((createdWatch) => {
@@ -81,19 +83,23 @@ router.get("/watchlist/:watchId", (req, res, next) => {
 });
 
 //PUT specific watchlist item
-router.put("/watchlist/:watchId", (req, res, next) => {
-  const { watchId } = req.params;
+router.put("/watchlist/:watchItemId", async (req, res, next) => {
+  try {
+    const { note } = req.body;
+    const updatedWatchItem = await Watch.findByIdAndUpdate(
+      req.params.watchItemId,
+      { $set: { note: note || "" } }, // Add or update the note
+      { new: true, upsert: true } // Upsert ensures a new document will be created if it doesn't exist
+    );
 
-  if (!mongoose.Types.ObjectId.isValid(watchId)) {
-    res.status(400).json({ message: "Specified id is not valid" });
-    return;
+    if (!updatedWatchItem) {
+      return res.status(404).json({ message: "Watch item not found" });
+    }
+
+    res.status(200).json(updatedWatchItem);
+  } catch (error) {
+    next(error);
   }
-
-  Watch.findByIdAndUpdate(watchId)
-    .then((updatedWatch) => {
-      res.json(updatedWatch);
-    })
-    .catch((err) => res.json(err));
 });
 
 //DELETE specific watchlist item
