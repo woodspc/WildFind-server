@@ -23,8 +23,8 @@ router.get("/users/:userId", (req, res, next) => {
     .populate("sightings")
     .populate("watchList")
     .populate("additions")
-    .populate("following")
     .populate("followers")
+    .populate("following")
     .populate({
       path: "conversations",
       populate: [
@@ -39,6 +39,7 @@ router.get("/users/:userId", (req, res, next) => {
         },
       ],
     })
+
     /*  .populate({
       path: "receivedMessages",
       populate: { path: "sender", select: "username" },

@@ -13,6 +13,7 @@ const watchSchema = new Schema(
     dangerLevel: String,
     edible: String,
     image: String,
+    note: { type: String, default: "" },
     description: { type: String, required: true },
     // location: { type: String, required: true },
     location: { type: [String], required: true },
