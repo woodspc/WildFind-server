@@ -6,6 +6,9 @@ const locationSchema = new Schema(
       type: String,
       required: true,
     },
+    country: {
+      type: String,
+    },
     placesOfInterest: [
       { type: Schema.Types.ObjectId, ref: "PlacesOfInterest" },
     ],
