@@ -41,7 +41,7 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
 
 //GET specific sightings by the location
 //Made this route to be able to access all of the sightings in a specific location, for the map
-router.get("/sightings/:locationId", (req, res, next) => {
+router.get("/sightings/locations/:locationId", (req, res, next) => {
   const { locationId } = req.params;
   Sighting.find({ locationId })
     .populate("specimenId")
@@ -114,7 +114,7 @@ router.post("/sightings", (req, res, next) => {
       }).then(() => createdSighting);
     })
     .then((createdSighting) => {
-      return Location.findByIdAndUpdate(placeOfInterestId, {
+      return PlacesOfInterest.findByIdAndUpdate(placeOfInterestId, {
         $push: { sightings: createdSighting._id },
       }).then(() => createdSighting);
     })

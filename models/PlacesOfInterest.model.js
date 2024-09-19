@@ -9,7 +9,7 @@ const placesOfInterestSchema = new Schema(
     description: {
       type: String,
     },
-    location: { type: Schema.Types.ObjectId, ref: "Location" },
+    locationId: { type: Schema.Types.ObjectId, ref: "Location" },
     billboard: {
       type: Schema.Types.Mixed,
     },

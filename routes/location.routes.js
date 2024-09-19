@@ -20,7 +20,7 @@ router.get("/locations", (req, res, next) => {
 });
 
 //GET specific location by Id
-router.get("/locations/:locationId", (req, res, next) => {
+/* router.get("/locations/:locationId", (req, res, next) => {
   const { locationId } = req.params;
 
   Location.findById({ locationId })
@@ -31,6 +31,25 @@ router.get("/locations/:locationId", (req, res, next) => {
     })
     .catch((error) => {
       console.log(error);
+    });
+}); */
+
+//GET specific location by the name
+router.get("/locations/:location", (req, res, next) => {
+  const { location } = req.params;
+
+  Location.findOne({ name: location })
+    .populate("placesOfInterest")
+    .populate("sightings")
+    .then((location) => {
+      if (!location) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      res.status(200).json(location);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ message: "Server error" });
     });
 });
 

@@ -10,7 +10,6 @@ const SightingSchema = new Schema(
     },
     image: String,
     description: { type: String, required: true },
-    // location: { type: [String], required: true },
     locationId: {
       type: Schema.Types.ObjectId,
       ref: "Location",
