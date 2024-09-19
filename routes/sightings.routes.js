@@ -6,6 +6,8 @@ const Sighting = require("../models/Sighting.model");
 const Specimen = require("../models/Specimen.model");
 const Actions = require("../models/Actions.model");
 const User = require("../models/User.model");
+const Location = require("../models/Location.model");
+const PlacesOfInterest = require("../models/PlacesOfInterest.model");
 
 // ********* require fileUploader in order to use it *********
 const fileUploader = require("../config/cloudinary.config");
@@ -39,9 +41,9 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
 
 //GET specific sightings by the location
 //Made this route to be able to access all of the sightings in a specific location, for the map
-router.get("/sightings/:location", (req, res, next) => {
-  const { location } = req.params;
-  Sighting.find({ location })
+router.get("/sightings/:locationId", (req, res, next) => {
+  const { locationId } = req.params;
+  Sighting.find({ locationId })
     .populate("specimenId")
     .then((sight) => {
       res.status(200).json(sight);
@@ -67,8 +69,16 @@ router.get("/sightings/:sightingId", (req, res, next) => {
 
 // POST new sighting
 router.post("/sightings", (req, res, next) => {
-  const { username, userId, specimenId, image, description, location, date } =
-    req.body;
+  const {
+    username,
+    userId,
+    specimenId,
+    image,
+    description,
+    locationId,
+    placeOfInterestId,
+    date,
+  } = req.body;
 
   // Validate specimenId
   if (!mongoose.isValidObjectId(specimenId)) {
@@ -82,7 +92,8 @@ router.post("/sightings", (req, res, next) => {
     specimenId,
     image,
     description,
-    location,
+    locationId,
+    placeOfInterestId,
     date,
   })
     //Add the sighting to specific animal
@@ -93,6 +104,17 @@ router.post("/sightings", (req, res, next) => {
     })
     .then((createdSighting) => {
       return User.findByIdAndUpdate(userId, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    //add specimen to the identifiedSpecies array in locations and point of interest
+    .then((createdSighting) => {
+      return Location.findByIdAndUpdate(locationId, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    .then((createdSighting) => {
+      return Location.findByIdAndUpdate(placeOfInterestId, {
         $push: { sightings: createdSighting._id },
       }).then(() => createdSighting);
     })

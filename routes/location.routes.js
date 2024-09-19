@@ -10,6 +10,7 @@ const Specimen = require("../models/Specimen.model");
 router.get("/locations", (req, res, next) => {
   Location.find()
     .populate("placesOfInterest")
+    .populate("sightings")
     .then((locations) => {
       res.status(200).json(locations);
     })
@@ -24,6 +25,7 @@ router.get("/locations/:locationId", (req, res, next) => {
 
   Location.findById({ locationId })
     .populate("placesOfInterest")
+    .populate("sightings")
     .then((location) => {
       res.status(200).json(location);
     })
@@ -34,9 +36,9 @@ router.get("/locations/:locationId", (req, res, next) => {
 
 //CREATE a location
 router.post("/locations", (req, res, next) => {
-  const { name, country } = req.body;
+  const { name, country, placesOfInterest, sightings } = req.body;
 
-  Location.create({ name, country })
+  Location.create({ name, country, placesOfInterest, sightings })
     .then((location) => {
       res.status(201).json(location);
     })
@@ -50,7 +52,7 @@ router.post("/locations", (req, res, next) => {
 router.get("/places-of-interest", (req, res, next) => {
   PlacesOfInterest.find()
     .populate("location")
-    .populate("identifiedSpecies")
+    .populate("sightings")
     .then((places) => {
       res.status(200).json(places);
     })
@@ -65,7 +67,7 @@ router.get("/places-of-interest/:placeOfInterestId", (req, res, next) => {
 
   PlacesOfInterest.findById({ placeOfInterestId })
     .populate("location")
-    .populate("identifiedSpecies")
+    .populate("sightings")
     .then((location) => {
       res.status(200).json(location);
     })
@@ -74,23 +76,17 @@ router.get("/places-of-interest/:placeOfInterestId", (req, res, next) => {
     });
 });
 
-//CREATE a place of interest
+//CREATE a place of interest and add it to a location
 router.post("/places-of-interest", (req, res, next) => {
-  const {
-    name,
-    description,
-    location,
-    billboard,
-    identifiedSpecies,
-    coordinates,
-  } = req.body;
+  const { name, description, location, billboard, sightings, coordinates } =
+    req.body;
 
   PlacesOfInterest.create({
     name,
     description,
     location,
     billboard,
-    identifiedSpecies,
+    sightings,
     coordinates,
   })
     .then((place) => {

@@ -12,6 +12,7 @@ const locationSchema = new Schema(
     placesOfInterest: [
       { type: Schema.Types.ObjectId, ref: "PlacesOfInterest" },
     ],
+    sightings: [{ type: Schema.Types.ObjectId, ref: "Specimen" }],
   },
   {
     timestamps: true,

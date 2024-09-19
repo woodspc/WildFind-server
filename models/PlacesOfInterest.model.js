@@ -13,7 +13,7 @@ const placesOfInterestSchema = new Schema(
     billboard: {
       type: Schema.Types.Mixed,
     },
-    identifiedSpecies: [{ type: Schema.Types.ObjectId, ref: "Specimen" }],
+    sightings: [{ type: Schema.Types.ObjectId, ref: "Specimen" }],
     coordinates: {
       latitude: { type: Number },
       longitude: { type: Number },
