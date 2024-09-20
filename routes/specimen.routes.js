@@ -67,8 +67,9 @@ router.get("/specimens/:specimenId/sightings", (req, res, next) => {
 
   Specimen.findById(specimenId)
     .populate("sightings")
+
     .then((specimen) => {
-      res.status(200).json(specimen.sightings);
+      res.status(200).json(specimen);
     })
     .catch((err) => next(err));
 });
