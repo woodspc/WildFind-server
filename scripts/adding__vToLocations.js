@@ -19,7 +19,6 @@ db.once("open", async () => {
     });
 
     for (const location of locations) {
-      location.__v = 0;
       await Location.findOneAndUpdate(
         { _id: location._id },
         { $set: { sightings: [], placesOfInterest: [] } },

@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const placesOfInterestSchema = new Schema(
+const placeOfInterestSchema = new Schema(
   {
     name: {
       type: String,
@@ -9,9 +9,14 @@ const placesOfInterestSchema = new Schema(
     description: {
       type: String,
     },
-    locationId: {
+    country: {
       type: Schema.Types.ObjectId,
-      ref: "Location",
+      ref: "Country",
+      required: true,
+    },
+    district: {
+      type: Schema.Types.ObjectId,
+      ref: "Disctrict",
       required: true,
     },
     billboard: {
@@ -28,6 +33,6 @@ const placesOfInterestSchema = new Schema(
   }
 );
 
-const PlacesOfInterest = model("PlacesOfInterest", placesOfInterestSchema);
+const PlaceOfInterest = model("PlaceOfInterest", placeOfInterestSchema);
 
-module.exports = PlacesOfInterest;
+module.exports = PlaceOfInterest;

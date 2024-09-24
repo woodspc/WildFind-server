@@ -7,7 +7,7 @@ const Specimen = require("../models/Specimen.model");
 const Actions = require("../models/Actions.model");
 const User = require("../models/User.model");
 const Location = require("../models/Location.model");
-const PlacesOfInterest = require("../models/PlacesOfInterest.model");
+const PlaceOfInterest = require("../models/PlaceOfInterest.model");
 
 // ********* require fileUploader in order to use it *********
 const fileUploader = require("../config/cloudinary.config");
