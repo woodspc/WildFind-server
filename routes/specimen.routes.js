@@ -6,6 +6,7 @@ const Specimen = require("../models/Specimen.model");
 const Sighting = require("../models/Sighting.model");
 const Actions = require("../models/Actions.model");
 const User = require("../models/User.model");
+const Location = require("../models/Location.model");
 
 const fileUploader = require("../config/cloudinary.config");
 
@@ -23,6 +24,7 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
 router.get("/specimens", (req, res, next) => {
   Specimen.find()
     .populate("sightings")
+    .populate("location")
     .then((specimens) => {
       res.status(200).json(specimens);
     })
@@ -34,6 +36,7 @@ router.get("/specimens", (req, res, next) => {
 router.get("/specimens", (req, res, next) => {
   Specimen.find({ typeId: { $lte: 8 } })
     .populate("sightings")
+    .populate("location")
     .then((specimens) => {
       res.status(200).json(specimens);
     })
@@ -54,6 +57,7 @@ router.get("/specimens/:specimenId", (req, res, next) => {
   Specimen.findById(specimenId)
     .populate("sightings")
     .populate("userId")
+    .populate("location")
     .then((specimen) => {
       res.status(200).json(specimen);
     })
@@ -62,12 +66,13 @@ router.get("/specimens/:specimenId", (req, res, next) => {
     });
 });
 
+//get sightings of a specific specimen
 router.get("/specimens/:specimenId/sightings", (req, res, next) => {
   const { specimenId } = req.params;
 
   Specimen.findById(specimenId)
     .populate("sightings")
-
+    .populate("location")
     .then((specimen) => {
       res.status(200).json(specimen);
     })

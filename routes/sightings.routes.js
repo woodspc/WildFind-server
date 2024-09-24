@@ -126,7 +126,7 @@ router.post("/sightings", (req, res, next) => {
       });
     })
     .then((response) => res.json(response))
-    .catch((err) => res.json(err));
+    .catch((err) => res.json("Server error creating sighting", err));
 });
 
 //Log items into actions

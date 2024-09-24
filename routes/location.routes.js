@@ -70,7 +70,7 @@ router.post("/locations", (req, res, next) => {
 //GET all places of interest
 router.get("/places-of-interest", (req, res, next) => {
   PlacesOfInterest.find()
-    .populate("location")
+    .populate("locationId")
     .populate("sightings")
     .then((places) => {
       res.status(200).json(places);
@@ -85,7 +85,7 @@ router.get("/places-of-interest/:placeOfInterestId", (req, res, next) => {
   const { placeOfInterestId } = req.params;
 
   PlacesOfInterest.findById({ placeOfInterestId })
-    .populate("location")
+    .populate("locationId")
     .populate("sightings")
     .then((location) => {
       res.status(200).json(location);
