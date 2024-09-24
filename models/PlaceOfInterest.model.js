@@ -16,7 +16,7 @@ const placeOfInterestSchema = new Schema(
     },
     district: {
       type: Schema.Types.ObjectId,
-      ref: "Disctrict",
+      ref: "District",
       required: true,
     },
     billboard: {

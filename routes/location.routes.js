@@ -2,12 +2,10 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-const Location = require("../models/Location.model");
-const PlacesOfInterest = require("../models/PlaceOfInterest.model");
 const Specimen = require("../models/Specimen.model");
-
 const Country = require("../models/Country.model");
 const District = require("../models/District.model");
+const PlaceOfInterest = require("../models/PlaceOfInterest.model");
 
 //CREATE a country
 router.post("/countries", (req, res, next) => {
@@ -57,7 +55,10 @@ router.post("/districts", (req, res, next) => {
 //GET all countries
 router.get("/countries", (req, res, next) => {
   Country.find()
-    .populate("districts")
+    .populate({
+      path: "districts",
+      select: "name",
+    })
     .populate("placesOfInterest")
     .populate("sightings")
     .then((countries) => {
@@ -71,7 +72,10 @@ router.get("/countries", (req, res, next) => {
 //GET all districts
 router.get("/districts", (req, res, next) => {
   District.find()
-    .populate("country")
+    .populate({
+      path: "country",
+      select: "name",
+    })
     .populate("placesOfInterest")
     .populate("sightings")
     .then((districts) => {
@@ -102,9 +106,48 @@ router.get("/districts/:district", (req, res, next) => {
 });
 
 //places of interest routes
+
+//CREATE a place of interest and add it to a district
+router.post("/places-of-interest", (req, res, next) => {
+  const {
+    name,
+    description,
+    country,
+    district,
+    billboard,
+    sightings,
+    coordinates,
+  } = req.body;
+
+  PlaceOfInterest.create({
+    name,
+    description,
+    country,
+    district,
+    billboard,
+    sightings,
+    coordinates,
+  })
+    .then((place) => {
+      return District.findByIdAndUpdate(
+        district,
+        {
+          $push: { placesOfInterest: place._id },
+        },
+        { new: true }
+      ).then(() => place);
+    })
+    .then((place) => {
+      res.status(201).json(place);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
 //GET all places of interest
 router.get("/places-of-interest", (req, res, next) => {
-  PlacesOfInterest.find()
+  PlaceOfInterest.find()
     .populate("locationId")
     .populate("sightings")
     .then((places) => {
@@ -119,49 +162,17 @@ router.get("/places-of-interest", (req, res, next) => {
 router.get("/places-of-interest/:placeOfInterestId", (req, res, next) => {
   const { placeOfInterestId } = req.params;
 
-  PlacesOfInterest.findById({ placeOfInterestId })
-    .populate("locationId")
-    .populate("sightings")
-    .then((location) => {
-      res.status(200).json(location);
+  PlaceOfInterest.findById(placeOfInterestId)
+    .populate({
+      path: "country",
+      select: "name",
     })
-    .catch((error) => {
-      console.log(error);
-    });
-});
-
-//CREATE a place of interest and add it to a location
-router.post("/places-of-interest", (req, res, next) => {
-  const {
-    name,
-    description,
-    country,
-    district,
-    billboard,
-    sightings,
-    coordinates,
-  } = req.body;
-
-  PlacesOfInterest.create({
-    name,
-    description,
-    country,
-    district,
-    billboard,
-    sightings,
-    coordinates,
-  })
-    .then((place) => {
-      return Location.findByIdAndUpdate(
-        location,
-        {
-          $push: { placesOfInterest: place._id },
-        },
-        { new: true }
-      ).then(() => place);
+    .populate({
+      path: "district",
+      select: "name",
     })
     .then((place) => {
-      res.status(201).json(place);
+      res.status(200).json(place);
     })
     .catch((error) => {
       console.log(error);
