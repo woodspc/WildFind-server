@@ -10,9 +10,14 @@ const SightingSchema = new Schema(
     },
     image: String,
     description: { type: String, required: true },
-    locationId: {
+    country: {
       type: Schema.Types.ObjectId,
-      ref: "Location",
+      ref: "Country",
+      required: true,
+    },
+    district: {
+      type: Schema.Types.ObjectId,
+      ref: "District",
       required: true,
     },
     date: { type: Date, default: Date.now },
@@ -24,9 +29,10 @@ const SightingSchema = new Schema(
       type: String,
       required: true,
     },
-    placeOfInterestId: [
-      { type: Schema.Types.ObjectId, ref: "PlacesOfInterest" },
-    ],
+    placeOfInterest: {
+      type: Schema.Types.ObjectId,
+      ref: "PlaceOfInterest",
+    },
   },
   {
     timestamps: true,

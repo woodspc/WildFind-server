@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-const Location = require("../models/Location.model");
-
 console.log("MONGODB_URI:", process.env.MONGODB_URI);
 
 mongoose.connect(process.env.MONGODB_URI);

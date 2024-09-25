@@ -15,7 +15,7 @@ const watchSchema = new Schema(
     image: String,
     note: { type: String, default: "" },
     description: { type: String, required: true },
-    locationId: [{ type: Schema.Types.ObjectId, ref: "Location" }],
+    country: [{ type: Schema.Types.ObjectId, ref: "Country" }],
     sightings: [{ type: Schema.Types.ObjectId, ref: "Sighting" }],
     userId: {
       type: String,

@@ -25,6 +25,23 @@ router.post("/countries", (req, res, next) => {
     });
 });
 
+//GET all countries
+router.get("/countries", (req, res, next) => {
+  Country.find()
+    .populate({
+      path: "districts",
+      select: "name",
+    })
+    .populate("placesOfInterest")
+    .populate("sightings")
+    .then((countries) => {
+      res.status(200).json(countries);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+
 //CREATE a district and push it to its country
 router.post("/districts", (req, res, next) => {
   const { name, country, placesOfInterest, sightings } = req.body;
@@ -46,23 +63,6 @@ router.post("/districts", (req, res, next) => {
     })
     .then((district) => {
       res.status(201).json(district);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-});
-
-//GET all countries
-router.get("/countries", (req, res, next) => {
-  Country.find()
-    .populate({
-      path: "districts",
-      select: "name",
-    })
-    .populate("placesOfInterest")
-    .populate("sightings")
-    .then((countries) => {
-      res.status(200).json(countries);
     })
     .catch((error) => {
       console.log(error);
@@ -148,7 +148,14 @@ router.post("/places-of-interest", (req, res, next) => {
 //GET all places of interest
 router.get("/places-of-interest", (req, res, next) => {
   PlaceOfInterest.find()
-    .populate("locationId")
+    .populate({
+      path: "country",
+      select: "name",
+    })
+    .populate({
+      path: "district",
+      select: "name",
+    })
     .populate("sightings")
     .then((places) => {
       res.status(200).json(places);
