@@ -20,6 +20,10 @@ const SightingSchema = new Schema(
       ref: "District",
       required: true,
     },
+    placeOfInterest: {
+      type: Schema.Types.ObjectId,
+      ref: "PlaceOfInterest",
+    },
     date: { type: Date, default: Date.now },
     username: {
       type: String,
@@ -28,10 +32,6 @@ const SightingSchema = new Schema(
     userId: {
       type: String,
       required: true,
-    },
-    placeOfInterest: {
-      type: Schema.Types.ObjectId,
-      ref: "PlaceOfInterest",
     },
   },
   {

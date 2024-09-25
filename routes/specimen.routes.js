@@ -23,6 +23,7 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
 router.get("/specimens", (req, res, next) => {
   Specimen.find()
     .populate("sightings")
+    .populate({ path: "country", select: "name" })
     .then((specimens) => {
       res.status(200).json(specimens);
     })
@@ -35,6 +36,7 @@ router.get("/specimens", (req, res, next) => {
 router.get("/specimens", (req, res, next) => {
   Specimen.find({ typeId: { $lte: 8 } })
     .populate("sightings")
+    .populate({ path: "country", select: "name" })
     .then((specimens) => {
       res.status(200).json(specimens);
     })

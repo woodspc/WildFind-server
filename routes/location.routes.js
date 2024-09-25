@@ -30,7 +30,9 @@ router.get("/countries", (req, res, next) => {
   Country.find()
     .populate({
       path: "districts",
-      select: "name",
+      populate: {
+        path: "placesOfInterest",
+      },
     })
     .populate("placesOfInterest")
     .populate("sightings")
