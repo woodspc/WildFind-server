@@ -56,6 +56,23 @@ router.get("/specimens/:specimenId", (req, res, next) => {
 
   Specimen.findById(specimenId)
     .populate("sightings")
+    .populate({
+      path: "sightings",
+      populate: [
+        {
+          path: "country",
+          select: "name",
+        },
+        {
+          path: "district",
+          select: "name",
+        },
+        {
+          path: "placeOfInterest",
+          select: "name",
+        },
+      ],
+    })
     .populate("userId")
     .populate("country")
     .then((specimen) => {
@@ -71,7 +88,7 @@ router.get("/specimens/:specimenId/sightings", (req, res, next) => {
   const { specimenId } = req.params;
 
   Specimen.findById(specimenId)
-    .populate("sightings")
+    .populate({ path: "country", select: "name" })
     .then((specimen) => {
       res.status(200).json(specimen);
     })
