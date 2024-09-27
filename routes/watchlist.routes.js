@@ -6,17 +6,6 @@ const Specimen = require("../models/Specimen.model");
 const Sightings = require("../models/Sighting.model");
 const User = require("../models/User.model");
 
-router.get("/watchlist", (req, res, next) => {
-  Watch.find()
-    .populate("sightings")
-    .then((watches) => {
-      res.status(200).json(watches);
-    })
-    .catch((err) => {
-      next(err);
-    });
-});
-
 //POST specific user's watchList array by using the userId in the request body
 router.post("/watchlist/:userId", (req, res, next) => {
   const { specimenId, userId, note } = req.body;
@@ -44,7 +33,7 @@ router.post("/watchlist/:userId", (req, res, next) => {
         image: specimen.image,
         note: note,
         description: specimen.description,
-        country: specimen.country,
+        country: specimen.country[0].name,
         sightings: specimen.sightings, // assuming sightings is an array of ObjectId references
         userId,
       });
@@ -63,6 +52,18 @@ router.post("/watchlist/:userId", (req, res, next) => {
     .catch((err) => next(err));
 });
 
+router.get("/watchlist", (req, res, next) => {
+  Watch.find()
+    .populate("sightings")
+    .populate("country")
+    .then((watches) => {
+      res.status(200).json(watches);
+    })
+    .catch((err) => {
+      next(err);
+    });
+});
+
 //GET specific watch item
 router.get("/watchlist/:watchId", (req, res, next) => {
   const { watchId } = req.params;
@@ -71,9 +72,9 @@ router.get("/watchlist/:watchId", (req, res, next) => {
     res.status(400).json({ message: "Specified id is not valid" });
     return;
   }
-
   Watch.findById(watchId)
     .populate("sightings")
+    .populate("country")
     .then((watch) => {
       res.status(200).json(watch);
     })

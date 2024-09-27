@@ -132,6 +132,10 @@ router.get("/sightings", (req, res, next) => {
   }
 
   Sighting.find(query)
+    .populate("country", "name")
+    .populate("district", "name")
+    .populate("placeOfInterest", "name")
+    .populate("specimenId", "name image")
     .then((sightings) => {
       res.status(200).json(sightings);
     })
