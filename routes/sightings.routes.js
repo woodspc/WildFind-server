@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
+const { ObjectId } = mongoose.Types;
 
 const Sighting = require("../models/Sighting.model");
 const Specimen = require("../models/Specimen.model");
 const Actions = require("../models/Actions.model");
 const User = require("../models/User.model");
+const Country = require("../models/Country.model");
+const District = require("../models/District.model");
+const PlaceOfInterest = require("../models/PlaceOfInterest.model");
 
 // ********* require fileUploader in order to use it *********
 const fileUploader = require("../config/cloudinary.config");
@@ -37,14 +41,103 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
   res.json({ fileUrl: req.file.path });
 });
 
-//GET specific sightings by the location
-//Made this route to be able to access all of the sightings in a specific location, for the map
-router.get("/sightings/:location", (req, res, next) => {
-  const { location } = req.params;
-  Sighting.find({ location })
-    .populate("specimenId")
-    .then((sight) => {
-      res.status(200).json(sight);
+// POST new sighting
+router.post("/sightings", (req, res, next) => {
+  const {
+    username,
+    userId,
+    specimenId,
+    image,
+    description,
+    country,
+    district,
+    placeOfInterest,
+    date,
+  } = req.body;
+
+  // Validate specimenId
+  if (!mongoose.isValidObjectId(specimenId)) {
+    return res.status(400).json({ message: "Invalid Id" });
+  }
+
+  // Create the new sighting
+  Sighting.create({
+    username,
+    userId,
+    specimenId,
+    image,
+    description,
+    country,
+    district,
+    placeOfInterest,
+    date,
+  })
+    //Add the sighting to specific animal
+    .then((createdSighting) => {
+      return Specimen.findByIdAndUpdate(specimenId, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    //Add the sighting to the user
+    .then((createdSighting) => {
+      return User.findByIdAndUpdate(userId, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    //add sighting to the country and district
+    .then((createdSighting) => {
+      return Country.findByIdAndUpdate(country, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    //add sighting to the district
+    .then((createdSighting) => {
+      return District.findByIdAndUpdate(district, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    //add sighting to the place of interest
+    .then((createdSighting) => {
+      return PlaceOfInterest.findByIdAndUpdate(placeOfInterest, {
+        $push: { sightings: createdSighting._id },
+      }).then(() => createdSighting);
+    })
+    //Add the created sighting to Actions collection
+    .then((createdSighting) => {
+      return Actions.create({
+        sighting: createdSighting._id,
+        user: createdSighting.userId,
+      });
+    })
+    .then((response) => res.json(response))
+    .catch((err) => res.json("Server error creating sighting", err));
+});
+
+//GET sightings of a specific country, district or place of interest by using query params
+//example: /sightings?country=5f9f1f3b9f4b1b0017f3b3b1&district=5f9f1f3b9f4b1b0017f3b3b1&placeOfInterest=5f9f1f3b9f4b1b0017f3b3b1
+router.get("/sightings", (req, res, next) => {
+  const { country, district, placeOfInterest } = req.query;
+  let query = {};
+
+  if (country) {
+    query.country = country;
+  }
+
+  if (district) {
+    query.district = district;
+  }
+
+  if (placeOfInterest) {
+    query.placeOfInterest = placeOfInterest;
+  }
+
+  Sighting.find(query)
+    .populate("country", "name")
+    .populate("district", "name")
+    .populate("placeOfInterest", "name")
+    .populate("specimenId", "name image")
+    .then((sightings) => {
+      res.status(200).json(sightings);
     })
     .catch((err) => {
       res.status(400).json(err);
@@ -63,48 +156,6 @@ router.get("/sightings/:sightingId", (req, res, next) => {
     .catch((err) => {
       res.status(400).json(err);
     });
-});
-
-// POST new sighting
-router.post("/sightings", (req, res, next) => {
-  const { username, userId, specimenId, image, description, location, date } =
-    req.body;
-
-  // Validate specimenId
-  if (!mongoose.isValidObjectId(specimenId)) {
-    return res.status(400).json({ message: "Invalid Id" });
-  }
-
-  // Create the new sighting
-  Sighting.create({
-    username,
-    userId,
-    specimenId,
-    image,
-    description,
-    location,
-    date,
-  })
-    //Add the sighting to specific animal
-    .then((createdSighting) => {
-      return Specimen.findByIdAndUpdate(specimenId, {
-        $push: { sightings: createdSighting._id },
-      }).then(() => createdSighting);
-    })
-    .then((createdSighting) => {
-      return User.findByIdAndUpdate(userId, {
-        $push: { sightings: createdSighting._id },
-      }).then(() => createdSighting);
-    })
-    //Add the created sighting to Actions collection
-    .then((createdSighting) => {
-      return Actions.create({
-        sighting: createdSighting._id,
-        user: createdSighting.userId,
-      });
-    })
-    .then((response) => res.json(response))
-    .catch((err) => res.json(err));
 });
 
 //Log items into actions
@@ -126,16 +177,6 @@ const loggerFunction = ({
 
 module.exports = router;
 
-/* return loggerFunction({
-  userId: createdSighting._id,
-  sighting: createdSighting._id,
-}); */
-/* 
-return Actions.create({
-  sighting: createdSighting._id,
-  user: createdSighting.userId,
-}); */
-
 // router.post("/tasks", (req, res, next) => {
 //     const { title, description, projectId } = req.body;
 
@@ -148,9 +189,3 @@ return Actions.create({
 // .then((response) => res.json(response))
 // .catch((err) => res.json(err));
 //   });
-
-// animalId: { type: Schema.Types.ObjectId, ref: "Animal", required: true },
-//     image: String,
-//     description: { type: String, required: true },
-//     location: { type: String, required: true },
-//     date: { type: Date, default: Date.now },

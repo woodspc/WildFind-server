@@ -42,6 +42,9 @@ app.use("/api", commentRouter);
 const messageRouter = require("./routes/message.routes");
 app.use("/api", messageRouter);
 
+const locationRouter = require("./routes/location.routes");
+app.use("/api", locationRouter);
+
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
 

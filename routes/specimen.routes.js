@@ -23,6 +23,7 @@ router.post("/upload", fileUploader.single("imageUrl"), (req, res, next) => {
 router.get("/specimens", (req, res, next) => {
   Specimen.find()
     .populate("sightings")
+    .populate({ path: "country", select: "name" })
     .then((specimens) => {
       res.status(200).json(specimens);
     })
@@ -31,9 +32,11 @@ router.get("/specimens", (req, res, next) => {
     });
 });
 
+//GET all specimens of type plant
 router.get("/specimens", (req, res, next) => {
   Specimen.find({ typeId: { $lte: 8 } })
     .populate("sightings")
+    .populate({ path: "country", select: "name" })
     .then((specimens) => {
       res.status(200).json(specimens);
     })
@@ -53,7 +56,25 @@ router.get("/specimens/:specimenId", (req, res, next) => {
 
   Specimen.findById(specimenId)
     .populate("sightings")
+    .populate({
+      path: "sightings",
+      populate: [
+        {
+          path: "country",
+          select: "name",
+        },
+        {
+          path: "district",
+          select: "name",
+        },
+        {
+          path: "placeOfInterest",
+          select: "name",
+        },
+      ],
+    })
     .populate("userId")
+    .populate("country")
     .then((specimen) => {
       res.status(200).json(specimen);
     })
@@ -62,13 +83,14 @@ router.get("/specimens/:specimenId", (req, res, next) => {
     });
 });
 
+//get sightings of a specific specimen
 router.get("/specimens/:specimenId/sightings", (req, res, next) => {
   const { specimenId } = req.params;
 
   Specimen.findById(specimenId)
-    .populate("sightings")
+    .populate({ path: "country", select: "name" })
     .then((specimen) => {
-      res.status(200).json(specimen.sightings);
+      res.status(200).json(specimen);
     })
     .catch((err) => next(err));
 });
@@ -84,14 +106,15 @@ router.post("/specimens", (req, res, next) => {
     edible,
     image,
     description,
-    location,
+    country,
+    district,
   } = req.body;
 
   if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].includes(typeId)) {
     return res.status(400).json({ message: "Invalid typeId" });
   }
 
-  if (!name || !description || !location) {
+  if (!name || !description || !country) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -104,7 +127,8 @@ router.post("/specimens", (req, res, next) => {
     edible,
     image,
     description,
-    location,
+    country,
+    district,
   };
 
   Specimen.create(newSpecimen)
@@ -177,46 +201,6 @@ router.delete("/specimens/:specimenId", (req, res, next) => {
 });
 
 module.exports = router;
-
-/* router.get("/plants", (req, res, next) => {
-  Specimen.find()
-    .populate("sightings")
-    .then((plants) => {
-      res.status(200).json(plants);
-    })
-    .catch((err) => {
-      next(err);
-    });
-}); */
-
-/* router.post("/plants", (req, res, next) => {
-  const { typeId, name, dangerLevel, image, description, location } = req.body;
-
-  if (![1, 2, 3, 4, 5, 6, 7, 8].includes(typeId)) {
-    return res.status(400).json({ message: "Invalid typeId" });
-  }
-
-  if (!name || !description || !location) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
-
-  const newSpecimen = {
-    typeId,
-    name,
-    dangerLevel,
-    image,
-    description,
-    location,
-  };
-
-  Specimen.create(newSpecimen)
-    .then((specimen) => {
-      res.status(201).json(specimen);
-    })
-    .catch((err) => {
-      next(err);
-    });
-}); */
 
 /* router.get("/plants/:specimenId", (req, res, next) => {
   const { specimenId } = req.params;

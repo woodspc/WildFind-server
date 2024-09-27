@@ -13,8 +13,8 @@ const specimenSchema = new Schema(
     edible: String,
     image: String,
     description: { type: String, required: true },
-    // location: { type: String, required: true },
-    location: { type: [String], required: true },
+    country: [{ type: Schema.Types.ObjectId, ref: "Country" }],
+    district: [{ type: Schema.Types.ObjectId, ref: "District" }],
     sightings: [{ type: Schema.Types.ObjectId, ref: "Sighting" }],
     username: {
       type: String,

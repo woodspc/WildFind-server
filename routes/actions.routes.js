@@ -14,15 +14,24 @@ router.get("/actions", (req, res, next) => {
       path: "comments",
       populate: { path: "userId" },
     })
-    //Nesting .populate to also receive the specimen information inside sightings
     .populate({
       path: "sighting",
-      populate: { path: "specimenId" },
+      populate: [
+        {
+          path: "country",
+          select: "name",
+        },
+        {
+          path: "district",
+          select: "name",
+        },
+        {
+          path: "placeOfInterest",
+          select: "name",
+        },
+        { path: "specimenId" },
+      ],
     })
-    // .populate({
-    //   path: "addition",
-    //   populate: { path: "_id" },
-    // })
     .populate("addition")
     .then((response) => {
       res.status(200).json(response);
