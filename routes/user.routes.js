@@ -22,6 +22,13 @@ router.get("/users/:userId", (req, res, next) => {
   User.findById(userId)
     .populate("sightings")
     .populate("watchList")
+    .populate({
+      path: "watchList",
+      populate: {
+        path: "country",
+        select: "name",
+      },
+    })
     .populate("additions")
     .populate("followers")
     .populate("following")
@@ -39,15 +46,6 @@ router.get("/users/:userId", (req, res, next) => {
         },
       ],
     })
-
-    /*  .populate({
-      path: "receivedMessages",
-      populate: { path: "sender", select: "username" },
-    })
-    .populate({
-      path: "sentMessages",
-      populate: { path: "receiver", select: "username" },
-    }) */
     .then((user) => {
       res.status(200).json(user);
     })
