@@ -33,6 +33,10 @@ router.get("/actions", (req, res, next) => {
       ],
     })
     .populate("addition")
+    .populate({
+      path: "addition",
+      populate: { path: "country", select: "name" },
+    })
     .then((response) => {
       res.status(200).json(response);
     })

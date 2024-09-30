@@ -33,7 +33,7 @@ router.post("/watchlist/:userId", (req, res, next) => {
         image: specimen.image,
         note: note,
         description: specimen.description,
-        country: specimen.country[0].name,
+        country: specimen.country[0]._id,
         sightings: specimen.sightings, // assuming sightings is an array of ObjectId references
         userId,
       });
