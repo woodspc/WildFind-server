@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-
+const Conversation = require("../models/Conversation.model");
 const User = require("../models/User.model");
 
 //GET all users
@@ -138,7 +138,53 @@ router.delete("/users/:userId", (req, res, next) => {
     });
 });
 
-//Post a new follower after clicking follow user button
+//Post a new follower
+router.post("/users/following/:followedUserId", async (req, res, next) => {
+  const { userId } = req.body;
+  const { followedUserId } = req.params;
+
+  try {
+    await User.findByIdAndUpdate(
+      userId,
+      {
+        $push: { following: followedUserId },
+      },
+      { new: true }
+    );
+    await User.findByIdAndUpdate(
+      followedUserId,
+      {
+        $push: { followers: userId },
+      },
+      { new: true }
+    );
+
+    //Check if users already have a conversation
+    let conversation = await Conversation.findOne({
+      $or: [
+        { user1Id: userId, user2Id: followedUserId },
+        { user1Id: followedUserId, user2Id: userId },
+      ],
+    });
+
+    //If no conversation exists, create one between users
+    if (!conversation) {
+      conversation = await Conversation.create({
+        user1Id: userId,
+        user2Id: followedUserId,
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $push: { conversations: conversation._id },
+    });
+    res.status(200).json({ message: "User followed successfully" });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+/* //Post a new follower after clicking follow user button
 router.post("/users/:followedUserId/following", (req, res, next) => {
   const { userId } = req.body; //currently logged in userId
   const { followedUserId } = req.params; //Id of the user you want to follow, picked up from params
@@ -151,18 +197,60 @@ router.post("/users/:followedUserId/following", (req, res, next) => {
     },
     { new: true }
   )
-
-    //Add the new follower to the current user's following array
+    //Create conversation with new follower
     .then((newFollower) => {
-      return User.findByIdAndUpdate(userId, {
-        $push: { following: newFollower._id },
+      const conversationExists = newFollower.conversations.includes(userId);
+
+      return Conversation.create({
+        user1Id: userId,
+        user2Id: followedUserId,
       });
     })
+    .then((newConversation) => {
+      // Push the new conversation to both users
+      return Promise.all([
+        User.findByIdAndUpdate(userId, {
+          $push: { conversations: newConversation._id },
+        }),
+        User.findByIdAndUpdate(followedUserId, {
+          $push: { conversations: newConversation._id },
+        }),
+      ]);
+    })
 
+    //Add the new follower to the current user's following array
+    .then(() => {
+      return User.findByIdAndUpdate(userId, {
+        $push: { following: followedUserId },
+      });
+    })
     .then(() => {
       res.status(200).json({ message: "User followed successfully" });
     })
     .catch((err) => next(err));
+});
+ */
+//Unfollow a user
+router.delete("/users/following/:followedUserId", async (req, res, next) => {
+  const { userId } = req.body;
+  const { followedUserId } = req.params;
+  try {
+    await User.findByIdAndUpdate(
+      userId,
+      { $pull: { following: followedUserId } },
+      { new: true }
+    );
+    await User.findByIdAndUpdate(
+      followedUserId,
+      { $pull: { followers: userId } },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "User successfully unfollowed" });
+  } catch (err) {
+    console.log("Error unfollowing user", err);
+    next(err);
+  }
 });
 
 module.exports = router;

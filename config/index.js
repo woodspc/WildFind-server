@@ -28,7 +28,6 @@ module.exports = (app) => {
     cors({
       origin: [
         FRONTEND_URL,
-        "https://wildfindserver.adaptable.app",
         "http://localhost:5173",
         "https://wildfind.netlify.app/",
       ],
